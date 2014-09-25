@@ -1,10 +1,10 @@
 /**
   Phonegap DatePicker Plugin
   https://github.com/sectore/phonegap3-ios-datepicker-plugin
-  
+
   Copyright (c) Greg Allen 2011
   Additional refactoring by Sam de Freyssinet
-  
+
   Rewrite by Jens Krause (www.websector.de)
 
   MIT Licensed
@@ -16,12 +16,13 @@ var exec = require('cordova/exec');
  */
 function DatePicker() {
     this._callback;
+    this._cancelCallback;
 }
 
 /**
  * show - true to show the ad, false to hide the ad
  */
-DatePicker.prototype.show = function(options, cb) {
+DatePicker.prototype.show = function(options, cb,cancelCb) {
     var padDate = function(date) {
       if (date.length == 1) {
         return ("0" + date);
@@ -30,15 +31,15 @@ DatePicker.prototype.show = function(options, cb) {
     };
 
     var formatDate = function(date){
-      date = date.getFullYear() 
-            + "-" 
-            + padDate(date.getMonth()+1) 
-            + "-" 
-            + padDate(date.getDate()) 
-            + "T" 
-            + padDate(date.getHours()) 
-            + ":" 
-            + padDate(date.getMinutes()) 
+      date = date.getFullYear()
+            + "-"
+            + padDate(date.getMonth()+1)
+            + "-"
+            + padDate(date.getDate())
+            + "T"
+            + padDate(date.getHours())
+            + ":"
+            + padDate(date.getMinutes())
             + ":00Z";
 
       return date
@@ -76,10 +77,10 @@ DatePicker.prototype.show = function(options, cb) {
             defaults[key] = options[key];
     }
     this._callback = cb;
-
-    exec(null, 
-      null, 
-      "DatePicker", 
+    this._cancelCallback=cancelCb;
+    exec(null,
+      null,
+      "DatePicker",
       "show",
       [defaults]
     );
@@ -90,7 +91,10 @@ DatePicker.prototype._dateSelected = function(date) {
     if (this._callback)
         this._callback(d);
 }
-
+DatePicker.prototype._datePickerCancelled = function(msg) {
+    if (this._cancelCallback)
+        this._cancelCallback(msg);
+}
 var datePicker = new DatePicker();
 module.exports = datePicker;
 
