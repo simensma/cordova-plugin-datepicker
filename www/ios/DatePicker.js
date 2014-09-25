@@ -16,7 +16,7 @@ var exec = require('cordova/exec');
  */
 function DatePicker() {
     this._callback;
-    this._cancelCallback;
+    //this._cancelCallback;
 }
 
 /**
@@ -77,7 +77,7 @@ DatePicker.prototype.show = function(options, cb,cancelCb) {
             defaults[key] = options[key];
     }
     this._callback = cb;
-    this._cancelCallback=cancelCb;
+    //this._cancelCallback=cancelCb;
     exec(null,
       null,
       "DatePicker",
@@ -91,9 +91,9 @@ DatePicker.prototype._dateSelected = function(date) {
     if (this._callback)
         this._callback(d);
 }
-DatePicker.prototype._datePickerCancelled = function(msg) {
+DatePicker.prototype._datePickerCancelled = function(msg) {/*
     if (this._cancelCallback)
-        this._cancelCallback(msg);
+        this._cancelCallback(msg);*/
 }
 var datePicker = new DatePicker();
 module.exports = datePicker;
