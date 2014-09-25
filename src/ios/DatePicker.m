@@ -126,7 +126,7 @@
 }
 
 - (IBAction)cancelAction:(id)sender {
-  [self jsDatePickerCancelled]
+  //[self jsDatePickerCancelled]
   [self hide];
 }
 
@@ -143,14 +143,14 @@
   //NSLog(jsCallback);
   [super writeJavascript:jsCallback];
 }
-
+/*
 - (void)jsDatePickerCancelled {
-  NSTimeInterval seconds = [self.datePicker.date timeIntervalSince1970];
+/*  NSTimeInterval seconds = [self.datePicker.date timeIntervalSince1970];
 
   NSString* jsCallback = [NSString stringWithFormat:@"datePicker._datePickerCancelled(\"%f\");", seconds];
-  //NSLog(jsCallback);
+  /NSLog(jsCallback);
   [super writeJavascript:jsCallback];
-}
+}*/
 #pragma mark - UIPopoverControllerDelegate methods
 
 - (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController {
