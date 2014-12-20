@@ -137,6 +137,12 @@
 
 #pragma mark - JS API
 
+- (void)jsCancel {
+  NSLog(@"JS Cancel is going to be executed");
+  NSString* jsCallback = [NSString stringWithFormat:@"datePicker._dateSelectionCanceled();"];
+  [super writeJavascript:jsCallback];
+}
+
 - (void)jsDateSelected {
   NSTimeInterval seconds = [self.datePicker.date timeIntervalSince1970];
   NSString* jsCallback = [NSString stringWithFormat:@"datePicker._dateSelected(\"%f\");", seconds];
@@ -164,9 +170,10 @@
   UIView *datePickerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, pickerViewWidth, pickerViewHeight)];
 
   CGRect frame = CGRectMake(0, 0, 0, 0);
-  if(!self.datePicker){
-    self.datePicker = [self createDatePicker:options frame:frame];
-    [self.datePicker addTarget:self action:@selector(dateChangedAction:) forControlEvents:UIControlEventValueChanged];
+  // in iOS8, UIDatePicker couldn't be shared in multi UIViews, it will cause crash. so   create new UIDatePicker instance every time
+  if (! self.datePicker || [[[UIDevice currentDevice] systemVersion] floatValue] >= 8.0){
+      self.datePicker = [self createDatePicker:options frame:frame];
+      [self.datePicker addTarget:self action:@selector(dateChangedAction:) forControlEvents:UIControlEventValueChanged];
   }
   [self updateDatePicker:options];
   [datePickerView addSubview:self.datePicker];
@@ -201,16 +208,24 @@
   BOOL allowFutureDates = ([[options objectForKey:@"allowFutureDates"] intValue] == 0) ? NO : YES;
   NSString *minDateString = [options objectForKey:@"minDate"];
   NSString *maxDateString = [options objectForKey:@"maxDate"];
-
-  if (!allowOldDates) {
+  NSString *minuteIntervalString = [options objectForKey:@"minuteInterval"];
+  NSInteger minuteInterval = [minuteIntervalString integerValue];
+  
+  if (allowOldDates) {
+    self.datePicker.minimumDate = nil;
+  }
+  else {
     self.datePicker.minimumDate = [NSDate date];
   }
 
   if(minDateString && minDateString.length > 0){
     self.datePicker.minimumDate = [formatter dateFromString:minDateString];
   }
-
-  if (!allowFutureDates) {
+ 
+  if (allowFutureDates) {
+    self.datePicker.maximumDate = nil;
+  }
+  else {
     self.datePicker.maximumDate = [NSDate date];
   }
 
@@ -228,10 +243,19 @@
   } else {
     self.datePicker.datePickerMode = UIDatePickerModeDateAndTime;
   }
+
+  if (minuteInterval) {
+    self.datePicker.minuteInterval = minuteInterval;
+  }
 }
 
 - (NSDateFormatter *)createISODateFormatter:(NSString *)format timezone:(NSTimeZone *)timezone {
   NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+  // Locale needed to avoid formatter bug on phones set to 12-hour
+  // time to avoid it adding AM/PM to the string we supply
+  // See: http://stackoverflow.com/questions/6613110/what-is-the-best-way-to-deal-with-the-nsdateformatter-locale-feature
+  NSLocale *loc = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US"];
+  [dateFormatter setLocale: loc];
   [dateFormatter setTimeZone:timezone];
   [dateFormatter setDateFormat:format];
 
